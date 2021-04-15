@@ -1,5 +1,5 @@
 import 'dart:html';
-
+import 'package:web3dart/web3dart.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -29,6 +29,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  Client httpClient;
+  Web3Client ethClient;
+  final testAddress = "0x8717A44ec01bFd229B732EBBD048fAD2ceA67F8b";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
