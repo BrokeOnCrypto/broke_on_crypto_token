@@ -37,7 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Web3Client ethClient;
   bool data = false;
   int theAmount = 0;
-  var myData;
+  var theData;
+  String txHash;
   final testAddress = "0x8717A44ec01bFd229B732EBBD048fAD2ceA67F8b";
 
   @override
@@ -51,32 +52,73 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // Loads the Eth contract, that will be queried
-  Future<DeployedContract> loadContract()async{
+  Future<DeployedContract> loadContract() async {
     String abi = await rootBundle.loadString("assets/abi.json");
     String contractAddress = "0xa2cA4DD471BffbAfda3b2B26f5a893456f2E0954";
-    final contract = DeployedContract(ContractAbi.fromJson(abi, "BrokeOnCryptoToken"), EthereumAddress.fromHex(contractAddress));
+    final contract = DeployedContract(
+        ContractAbi.fromJson(abi, "BrokeOnCryptoToken"),
+        EthereumAddress.fromHex(contractAddress));
     return contract;
   }
 
   // Queries the eth contract
-  Future<List<dynamic>> query(String functionName, List<dynamic> args) async{
+  Future<List<dynamic>> query(String functionName, List<dynamic> args) async {
     final contract = await loadContract();
     final ethFunction = contract.function(functionName);
-    final result = await ethClient.call(contract: contract, function: ethFunction, params: args);
+    final result = await ethClient.call(
+        contract: contract, function: ethFunction, params: args);
 
     return result;
   }
 
   // retrieves balance of address
-  Future<void> getBalance(String targetAddress) async{
+  Future<void> getBalance(String targetAddress) async {
     // EthereumAddress address = EthereumAddress.fromHex(targetAddress);
     List<dynamic> result = await query("getBalance", []);
 
-    myData = result[0];
+    theData = result[0];
     data = true;
+    setState(() {});
+  }
+
+  // Any private key will work because this is a test account, and I would not expose it like this in reality
+  Future<String> submit(String functionName, List<dynamic> args) async {
+    // NEVER POST YOUR PRIVATE KEY THIS WAY, unless it is a test account like this one
+    EthPrivateKey credentials = EthPrivateKey.fromHex(
+        "672a7cbf6c2d356c7e825b3c8b2125f4b98c453c72807c9af5fd509c92e3391e");
+
+    DeployedContract contract = await loadContract();
+    final ethFunction = contract.function(functionName);
+    final result = await ethClient.sendTransaction(
+        credentials,
+        Transaction.callContract(
+            contract: contract, function: ethFunction, parameters: args),
+        fetchChainIdFromNetworkId: true);
+    return result;
+  }
+
+  // Allows sending of the token
+  Future<String> sendToken() async {
+    var bigAmount = BigInt.from(theAmount);
+
+    var response = await submit("depositBalance", [bigAmount]);
+
+    print("Deposited");
+    txHash = response;
     setState(() {
 
     });
+    return response;
+  }
+
+  // Allows token withdrawal
+  Future<String> withdrawToken() async {
+    var bigAmount = BigInt.from(theAmount);
+
+    var response = await submit("withdrawBalance", [bigAmount]);
+
+    print("withdrawn");
+    return response;
   }
 
   //UI
@@ -96,9 +138,9 @@ class _MyHomePageState extends State<MyHomePage> {
           VxBox(
                   child: VStack([
             "Balance".text.gray700.xl2.semiBold.makeCentered(),
-            10.heightBox,
+            5.heightBox,
             data
-                ? "\$1".text.bold.xl6.makeCentered()
+                ? "\$${theData}".text.bold.xl6.makeCentered().shimmer()
                 : CircularProgressIndicator().centered(),
           ]))
               .p16
@@ -120,23 +162,28 @@ class _MyHomePageState extends State<MyHomePage> {
           HStack(
             [
               StyledTextButton(
-                  passedText: "Refresh",
-                  passedColor: Colors.blue,
-                  passedIcon: Icons.refresh),
+                passedText: "Refresh",
+                passedColor: Colors.blue,
+                passedIcon: Icons.refresh,
+                passedOnPressed: getBalance(testAddress),
+              ),
               StyledTextButton(
                 passedText: "Deposit",
                 passedColor: Colors.green,
                 passedIcon: Icons.call_made_outlined,
+                passedOnPressed: sendToken(),
               ),
               StyledTextButton(
                 passedText: "Withdraw",
                 passedColor: Colors.red,
                 passedIcon: Icons.call_received_outlined,
+                passedOnPressed: withdrawToken(),
               ),
             ],
             alignment: MainAxisAlignment.spaceAround,
             axisSize: MainAxisSize.max,
-          ).p16()
+          ).p16(),
+          if (txHash != null) txHash.text.black.makeCentered().p16()
         ])
       ]),
     );
@@ -148,20 +195,22 @@ class StyledTextButton extends StatelessWidget {
   final Color passedColor;
   final String passedText;
   final IconData passedIcon;
-  final Function passedPadding;
+  final Future passedOnPressed;
 
   const StyledTextButton(
       {Key key,
       this.passedColor,
       this.passedText,
       this.passedIcon,
-      this.passedPadding})
+      this.passedOnPressed})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextButton.icon(
-        onPressed: () {},
+        onPressed: () {
+          this.passedOnPressed;
+        },
         style: TextButton.styleFrom(
           backgroundColor: this.passedColor,
         ),
