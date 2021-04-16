@@ -6,12 +6,15 @@ class SliderWidget extends StatefulWidget {
   final int min;
   final int max;
   final fullWidth;
+  final ValueChanged<double> finalVal;
 
   SliderWidget(
       {this.sliderHeight = 48,
         this.max = 10,
         this.min = 0,
-        this.fullWidth = false});
+        this.fullWidth = false,
+        this.finalVal
+      });
 
   @override
   _SliderWidgetState createState() => _SliderWidgetState();
@@ -87,6 +90,7 @@ class _SliderWidgetState extends State<SliderWidget> {
                         setState(() {
                           _value = value;
                         });
+                        widget.finalVal(_value);
                       }),
                 ),
               ),

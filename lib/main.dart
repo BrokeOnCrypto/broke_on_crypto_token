@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Client httpClient;
   Web3Client ethClient;
   bool data = false;
+  int theAmount = 0;
   final testAddress = "0x8717A44ec01bFd229B732EBBD048fAD2ceA67F8b";
 
   @override
@@ -69,7 +70,12 @@ class _MyHomePageState extends State<MyHomePage> {
           SliderWidget(
             min: 0,
             max: 100,
-          ),
+            finalVal: (value){
+              theAmount = (value*100).round();
+              print("$theAmount");
+
+            },
+          ).centered(),
           HStack(
             [
               StyledTextButton(
