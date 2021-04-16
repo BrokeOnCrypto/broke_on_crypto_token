@@ -1,3 +1,4 @@
+import 'package:broke_on_crypto_token/slider_widget.dart';
 import 'package:http/http.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:web3dart/web3dart.dart';
@@ -65,6 +66,10 @@ class _MyHomePageState extends State<MyHomePage> {
               .make()
               .p16(),
           30.heightBox,
+          SliderWidget(
+            min: 0,
+            max: 100,
+          ),
           HStack(
             [
               StyledTextButton(
