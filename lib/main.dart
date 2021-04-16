@@ -66,9 +66,9 @@ class _MyHomePageState extends State<MyHomePage> {
               .p16(),
           30.heightBox,
           HStack([
-            StyledTextButton(),
-            StyledTextButton(),
-            StyledTextButton(),
+            StyledTextButton(passedText: "Refresh", passedColor: Colors.blue),
+            StyledTextButton(passedText: "Refresh", passedColor: Colors.blue),
+            StyledTextButton(passedText: "Refresh", passedColor: Colors.blue),
 
           ])
         ])
@@ -78,21 +78,23 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class StyledTextButton extends StatelessWidget {
-  const StyledTextButton({
-    Key key,
-  }) : super(key: key);
+  final Color passedColor;
+  final String passedText;
+  const StyledTextButton(
+      {Key key, this.passedColor, this.passedText})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextButton.icon(
         onPressed: () {},
         style: TextButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: this.passedColor,
         ),
         icon: Icon(
           Icons.refresh,
           color: Colors.white,
         ),
-        label: "Refresh".text.white.make());
+        label: this.passedText.text.white.make());
   }
 }
