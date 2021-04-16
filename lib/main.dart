@@ -65,23 +65,41 @@ class _MyHomePageState extends State<MyHomePage> {
               .make()
               .p16(),
           30.heightBox,
-          HStack([
-            StyledTextButton(passedText: "Refresh", passedColor: Colors.blue),
-            StyledTextButton(passedText: "Refresh", passedColor: Colors.blue),
-            StyledTextButton(passedText: "Refresh", passedColor: Colors.blue),
-
-          ])
+          HStack(
+            [
+              StyledTextButton(
+                  passedText: "Refresh",
+                  passedColor: Colors.blue,
+                  passedIcon: Icons.refresh),
+              StyledTextButton(
+                passedText: "Deposit",
+                passedColor: Colors.green,
+                passedIcon: Icons.call_made_outlined,
+              ),
+              StyledTextButton(
+                passedText: "Withdraw",
+                passedColor: Colors.red,
+                passedIcon: Icons.call_received_outlined,
+              ),
+            ],
+            alignment: MainAxisAlignment.spaceAround,
+            axisSize: MainAxisSize.max,
+          ).p16()
         ])
       ]),
     );
   }
 }
 
+// Customized TextButton
 class StyledTextButton extends StatelessWidget {
   final Color passedColor;
   final String passedText;
+  final IconData passedIcon;
+  final Function passedPadding;
+
   const StyledTextButton(
-      {Key key, this.passedColor, this.passedText})
+      {Key key, this.passedColor, this.passedText, this.passedIcon, this.passedPadding})
       : super(key: key);
 
   @override
@@ -91,10 +109,7 @@ class StyledTextButton extends StatelessWidget {
         style: TextButton.styleFrom(
           backgroundColor: this.passedColor,
         ),
-        icon: Icon(
-          Icons.refresh,
-          color: Colors.white,
-        ),
-        label: this.passedText.text.white.make());
+        icon: Icon(passedIcon, color: Colors.white,),
+        label: this.passedText.text.white.makeCentered().h(50));
   }
 }
