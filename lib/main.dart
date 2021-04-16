@@ -1,4 +1,5 @@
 import 'package:broke_on_crypto_token/slider_widget.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:web3dart/web3dart.dart';
@@ -36,8 +37,49 @@ class _MyHomePageState extends State<MyHomePage> {
   Web3Client ethClient;
   bool data = false;
   int theAmount = 0;
+  var myData;
   final testAddress = "0x8717A44ec01bFd229B732EBBD048fAD2ceA67F8b";
 
+  @override
+  void initState() {
+    super.initState();
+    httpClient = Client();
+    ethClient = Web3Client(
+        "https://rinkeby.infura.io/v3/39c273ea50514253a5265950238a48d7",
+        httpClient);
+    getBalance(testAddress);
+  }
+
+  // Loads the Eth contract, that will be queried
+  Future<DeployedContract> loadContract()async{
+    String abi = await rootBundle.loadString("assets/abi.json");
+    String contractAddress = "0xa2cA4DD471BffbAfda3b2B26f5a893456f2E0954";
+    final contract = DeployedContract(ContractAbi.fromJson(abi, "BrokeOnCryptoToken"), EthereumAddress.fromHex(contractAddress));
+    return contract;
+  }
+
+  // Queries the eth contract
+  Future<List<dynamic>> query(String functionName, List<dynamic> args) async{
+    final contract = await loadContract();
+    final ethFunction = contract.function(functionName);
+    final result = await ethClient.call(contract: contract, function: ethFunction, params: args);
+
+    return result;
+  }
+
+  // retrieves balance of address
+  Future<void> getBalance(String targetAddress) async{
+    // EthereumAddress address = EthereumAddress.fromHex(targetAddress);
+    List<dynamic> result = await query("getBalance", []);
+
+    myData = result[0];
+    data = true;
+    setState(() {
+
+    });
+  }
+
+  //UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,10 +112,9 @@ class _MyHomePageState extends State<MyHomePage> {
           SliderWidget(
             min: 0,
             max: 100,
-            finalVal: (value){
-              theAmount = (value*100).round();
+            finalVal: (value) {
+              theAmount = (value * 100).round();
               print("$theAmount");
-
             },
           ).centered(),
           HStack(
@@ -110,7 +151,11 @@ class StyledTextButton extends StatelessWidget {
   final Function passedPadding;
 
   const StyledTextButton(
-      {Key key, this.passedColor, this.passedText, this.passedIcon, this.passedPadding})
+      {Key key,
+      this.passedColor,
+      this.passedText,
+      this.passedIcon,
+      this.passedPadding})
       : super(key: key);
 
   @override
@@ -120,7 +165,10 @@ class StyledTextButton extends StatelessWidget {
         style: TextButton.styleFrom(
           backgroundColor: this.passedColor,
         ),
-        icon: Icon(passedIcon, color: Colors.white,),
+        icon: Icon(
+          passedIcon,
+          color: Colors.white,
+        ),
         label: this.passedText.text.white.makeCentered().h(50));
   }
 }
